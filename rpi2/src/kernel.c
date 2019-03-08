@@ -20,6 +20,7 @@ void kernel_init(void);
 void input_output_init(void);
 void sys_info( uint8_t* );
 void sd_card_fs_demo();
+void catText(char* file_name);
 
 /*
  *		Kernel's entry point
@@ -109,8 +110,9 @@ void sd_card_fs_demo(){
 
   printf_serial("\n");
   printf_serial("Opening Alice.txt \n");
+  catText("Alice.txt");
 
-  HANDLE fHandle = sdCreateFile("Alice.txt", GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+/*   HANDLE fHandle = sdCreateFile("Alice.txt", GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
   if (fHandle != 0) {
     uint32_t bytesRead;
 
@@ -125,8 +127,29 @@ void sd_card_fs_demo(){
     // Close the file
     sdCloseHandle(fHandle);
 
-  }
+  } */
 
+}
+
+void catText(char* file_name) {
+	char text_buffer[2];
+	HANDLE fHandle = sdCreateFile(file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if (fHandle != 0) {
+		uint32_t bytesRead;
+		
+		while (1) {
+			if (sdReadFile(fHandle, text_buffer, 1, &bytesRead, 0) != true) {
+				printf_serial("Failed to read");
+				break;
+			}
+			if (text_buffer[0] == -1) {
+				break;
+			}
+			text_buffer[bytesRead] = 0;
+			printf_serial("%s", text_buffer);
+		}
+	}
+	sdCloseHandle(fHandle);
 }
 
 void DisplayDirectory(const char* dirName) {
