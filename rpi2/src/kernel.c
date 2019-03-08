@@ -136,6 +136,10 @@ void catText(char* file_name) {
 	HANDLE fHandle = sdCreateFile(file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if (fHandle != 0) {
 		uint32_t bytesRead;
+
+    // Fake directory bullshit:global current directory
+    char currentDir[256];
+    memset(currentDir, '\0', 256);
 		
 		while (1) {
 			if (sdReadFile(fHandle, text_buffer, 1, &bytesRead, 0) != true) {
@@ -174,3 +178,13 @@ void DisplayDirectory(const char* dirName) {
 	} while (sdFindNextFile(fh, &find) != 0);						// Loop finding next file
 	sdFindClose(fh);												// Close the serach handle
 }
+
+/*
+  Need global currentDir string to change, put it into old_dir
+  User input will be thrown into old_dir to update it
+*/
+void ChangeDirectory(char * old_dir, char* new_dir) {
+  strcpy(old_dir, new_dir);
+  printf_serial( "filepath %s \n\r", old_dir);
+}
+
