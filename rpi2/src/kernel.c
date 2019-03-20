@@ -21,6 +21,8 @@ void input_output_init(void);
 void sys_info( uint8_t* );
 void sd_card_fs_demo();
 void catText(char* file_name);
+void openBin(char* file_name);
+void printFile(char* file_name, int file_size);
 
 /*
  *		Kernel's entry point
@@ -32,6 +34,8 @@ void main(uint32_t r0, uint32_t r1, uint32_t atags){
   input_output_init();
 
   sd_card_fs_demo();   //<<-- Uncomment this to show File System/SD Card demo
+  
+  openBin("app.bin");
 
   //Welcome Msg Video
   hal_io_video_puts( "\n\r\n\rWelcome to MiniOS Pi Zero\n\r", 3, VIDEO_COLOR_GREEN );
@@ -97,6 +101,7 @@ void sys_info( uint8_t* msg ){
 /////////////////////////////////////////////////////////////////
 
 char buffer[500];
+char bin_buffer[8192];
 void DisplayDirectory(const char*);
 
 
@@ -154,6 +159,33 @@ void catText(char* file_name) {
 		}
 	}
 	sdCloseHandle(fHandle);
+}
+
+void openBin(char* file_name) {
+	char text_buffer;
+	int counter = 0;
+	
+	HANDLE fHandle = sdCreateFile(file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if (fHandle != 0) {
+		uint32_t bytesRead;
+	
+		while (1) {
+			if (sdReadFile(fHandle, &text_buffer, 1, &bytesRead, 0) != true) {
+				printf_serial("\nFinished reader\n");
+				break;
+			}
+			bin_buffer[counter] = text_buffer;
+			//printf_serial("%c", bin_buffer[counter]);
+			++counter;
+		}
+	}
+	printFile(bin_buffer, counter);
+}
+
+void printFile(char* file_name, int file_size) {
+	for (int i = 0; i < file_size; ++i) {
+		printf_serial("%c", file_name[i]);
+	}		
 }
 
 void DisplayDirectory(const char* dirName) {
